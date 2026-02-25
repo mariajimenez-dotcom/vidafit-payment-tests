@@ -1,4 +1,5 @@
 """Test data factories using Faker."""
+
 from decimal import Decimal
 from faker import Faker
 import uuid
@@ -17,7 +18,7 @@ class PaymentFactory:
         currency: str = "USD",
         status: PaymentStatus = PaymentStatus.PENDING,
         idempotency_key: str = None,
-        card: Card = None
+        card: Card = None,
     ) -> Payment:
         """Create a payment with sensible defaults."""
         return Payment(
@@ -26,7 +27,7 @@ class PaymentFactory:
             currency=currency,
             status=status,
             idempotency_key=idempotency_key or str(uuid.uuid4()),
-            card=card or CardFactory.create()
+            card=card or CardFactory.create(),
         )
 
     @staticmethod
@@ -44,7 +45,7 @@ class CardFactory:
         exp_month: int = None,
         exp_year: int = None,
         cvv: str = None,
-        holder_name: str = None
+        holder_name: str = None,
     ) -> Card:
         """Create a card with sensible defaults."""
         return Card(
@@ -52,7 +53,7 @@ class CardFactory:
             exp_month=exp_month or 12,
             exp_year=exp_year or 2025,
             cvv=cvv or "123",
-            holder_name=holder_name or fake.name()
+            holder_name=holder_name or fake.name(),
         )
 
 
@@ -66,7 +67,7 @@ class TransactionFactory:
         currency: str = "USD",
         status: str = "pending",
         gateway: str = "primary",
-        idempotency_key: str = None
+        idempotency_key: str = None,
     ) -> Transaction:
         """Create a transaction with sensible defaults."""
         return Transaction(
@@ -76,5 +77,5 @@ class TransactionFactory:
             currency=currency,
             status=status,
             gateway=gateway,
-            idempotency_key=idempotency_key
+            idempotency_key=idempotency_key,
         )

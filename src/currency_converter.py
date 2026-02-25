@@ -1,4 +1,5 @@
 """Currency conversion with proper decimal handling."""
+
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, Optional
 
@@ -14,6 +15,7 @@ EXCHANGE_RATES: Dict[tuple, Decimal] = {
 
 class CurrencyConversionError(Exception):
     """Raised when currency conversion fails."""
+
     pass
 
 
@@ -21,7 +23,7 @@ def convert_currency(
     amount: Decimal,
     from_currency: str,
     to_currency: str,
-    exchange_rate: Optional[Decimal] = None
+    exchange_rate: Optional[Decimal] = None,
 ) -> Decimal:
     """
     Convert amount from one currency to another using Decimal for precision.
@@ -53,19 +55,21 @@ def convert_currency(
 
     # Ensure we're working with Decimal types
     amount_decimal = Decimal(str(amount)) if not isinstance(amount, Decimal) else amount
-    rate_decimal = Decimal(str(exchange_rate)) if not isinstance(exchange_rate, Decimal) else exchange_rate
+    rate_decimal = (
+        Decimal(str(exchange_rate))
+        if not isinstance(exchange_rate, Decimal)
+        else exchange_rate
+    )
 
     # Perform conversion
     converted = amount_decimal * rate_decimal
 
     # Round to 2 decimal places (standard for most currencies)
-    return converted.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    return converted.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 def roundtrip_conversion(
-    amount: Decimal,
-    from_currency: str,
-    to_currency: str
+    amount: Decimal, from_currency: str, to_currency: str
 ) -> Decimal:
     """
     Convert currency and convert back to verify precision.
@@ -77,9 +81,6 @@ def roundtrip_conversion(
     return convert_currency(converted, to_currency, from_currency)
 
 
-def get_conversion_variance(
-    original: Decimal,
-    roundtrip: Decimal
-) -> Decimal:
+def get_conversion_variance(original: Decimal, roundtrip: Decimal) -> Decimal:
     """Calculate variance between original and roundtrip amount."""
     return abs(original - roundtrip)

@@ -3,6 +3,7 @@ Unit tests for currency conversion with proper decimal handling.
 
 These tests prevent Bug #4: Currency conversion rounding errors (0.01 BRL discrepancies).
 """
+
 import pytest
 from decimal import Decimal
 
@@ -10,7 +11,7 @@ from src.currency_converter import (
     convert_currency,
     roundtrip_conversion,
     get_conversion_variance,
-    CurrencyConversionError
+    CurrencyConversionError,
 )
 
 
@@ -47,10 +48,7 @@ class TestCurrencyConversion:
 
         # Test conversion maintains precision
         result = convert_currency(
-            Decimal("100.00"),
-            "USD",
-            "BRL",
-            exchange_rate=Decimal("5.25")
+            Decimal("100.00"), "USD", "BRL", exchange_rate=Decimal("5.25")
         )
 
         # Should be exactly 525.00, not 524.9999999
@@ -110,12 +108,7 @@ class TestCurrencyConversion:
         amount = Decimal("100.00")
         custom_rate = Decimal("6.00")
 
-        result = convert_currency(
-            amount,
-            "USD",
-            "BRL",
-            exchange_rate=custom_rate
-        )
+        result = convert_currency(amount, "USD", "BRL", exchange_rate=custom_rate)
 
         # Should use custom rate: 100 * 6.00 = 600.00
         assert result == Decimal("600.00")
@@ -131,9 +124,9 @@ class TestCurrencyConversion:
         result = convert_currency(amount, "USD", "EUR", exchange_rate=rate)
 
         # Check result has exactly 2 decimal places
-        assert result == result.quantize(Decimal('0.01'))
+        assert result == result.quantize(Decimal("0.01"))
 
         # Convert to string and verify format
         result_str = str(result)
-        decimal_places = len(result_str.split('.')[-1]) if '.' in result_str else 0
+        decimal_places = len(result_str.split(".")[-1]) if "." in result_str else 0
         assert decimal_places == 2

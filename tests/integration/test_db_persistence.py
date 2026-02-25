@@ -3,6 +3,7 @@ Integration tests for database persistence and state consistency.
 
 These tests ensure payment states are correctly persisted and race conditions are prevented.
 """
+
 import pytest
 import threading
 from decimal import Decimal
@@ -75,8 +76,7 @@ class TestDatabasePersistence:
 
         # Create 20 threads all trying to update same payment
         threads = [
-            threading.Thread(target=update_payment, args=(i,))
-            for i in range(20)
+            threading.Thread(target=update_payment, args=(i,)) for i in range(20)
         ]
 
         # Start all threads
@@ -119,7 +119,7 @@ class TestDatabasePersistence:
             status="success",
             gateway="primary",
             gateway_transaction_id=response.transaction_id,
-            idempotency_key=payment.idempotency_key
+            idempotency_key=payment.idempotency_key,
         )
 
         fake_db.save_transaction(transaction)

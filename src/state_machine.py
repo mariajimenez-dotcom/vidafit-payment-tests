@@ -1,33 +1,27 @@
 """State machine for payment status transitions."""
+
 from typing import Dict, List
 from src.models import PaymentStatus
 
 
 class InvalidStateTransitionError(Exception):
     """Raised when an invalid state transition is attempted."""
+
     pass
 
 
 # Valid state transitions mapping
 VALID_TRANSITIONS: Dict[PaymentStatus, List[PaymentStatus]] = {
-    PaymentStatus.PENDING: [
-        PaymentStatus.PROCESSING,
-        PaymentStatus.FAILED
-    ],
+    PaymentStatus.PENDING: [PaymentStatus.PROCESSING, PaymentStatus.FAILED],
     PaymentStatus.PROCESSING: [
         PaymentStatus.SUCCESS,
         PaymentStatus.FAILED,
-        PaymentStatus.DECLINED_RETRIABLE
+        PaymentStatus.DECLINED_RETRIABLE,
     ],
-    PaymentStatus.SUCCESS: [
-        PaymentStatus.REFUNDED
-    ],
-    PaymentStatus.DECLINED_RETRIABLE: [
-        PaymentStatus.PROCESSING,
-        PaymentStatus.FAILED
-    ],
+    PaymentStatus.SUCCESS: [PaymentStatus.REFUNDED],
+    PaymentStatus.DECLINED_RETRIABLE: [PaymentStatus.PROCESSING, PaymentStatus.FAILED],
     PaymentStatus.FAILED: [],  # Terminal state
-    PaymentStatus.REFUNDED: []  # Terminal state
+    PaymentStatus.REFUNDED: [],  # Terminal state
 }
 
 

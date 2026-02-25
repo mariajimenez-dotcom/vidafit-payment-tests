@@ -9,6 +9,7 @@ due to time constraints. In production, would expand to cover:
 - Webhook processing
 - Refund flows
 """
+
 import pytest
 import threading
 from decimal import Decimal
@@ -41,10 +42,7 @@ class TestCheckoutFlow:
         processor = PaymentProcessor(gateway=gateway, database=db)
 
         # Create payment for customer purchase
-        payment = PaymentFactory.create(
-            amount=Decimal("149.99"),
-            currency="USD"
-        )
+        payment = PaymentFactory.create(amount=Decimal("149.99"), currency="USD")
 
         # Process payment
         response = processor.process_payment(payment)
@@ -65,9 +63,9 @@ class TestCheckoutFlow:
         # Verify gateway was called with correct idempotency
         assert len(gateway.call_log) >= 1
         auth_call = gateway.call_log[0]
-        assert auth_call['operation'] == 'authorize'
-        assert auth_call['amount'] == Decimal("149.99")
-        assert auth_call['idempotency_key'] == payment.idempotency_key
+        assert auth_call["operation"] == "authorize"
+        assert auth_call["amount"] == Decimal("149.99")
+        assert auth_call["idempotency_key"] == payment.idempotency_key
 
     def test_concurrent_payments_no_duplicate_charges(self):
         """
@@ -89,23 +87,19 @@ class TestCheckoutFlow:
                 processor = PaymentProcessor(gateway=gateway, database=db)
 
                 # Each customer has unique payment with unique idempotency key
-                payment = PaymentFactory.create(
-                    amount=Decimal("99.99"),
-                    currency="USD"
-                )
+                payment = PaymentFactory.create(amount=Decimal("99.99"), currency="USD")
 
                 response = processor.process_payment(payment)
-                results.append({
-                    'customer_id': customer_id,
-                    'payment_id': payment.id,
-                    'success': response.success,
-                    'transaction_id': response.transaction_id
-                })
+                results.append(
+                    {
+                        "customer_id": customer_id,
+                        "payment_id": payment.id,
+                        "success": response.success,
+                        "transaction_id": response.transaction_id,
+                    }
+                )
             except Exception as e:
-                errors.append({
-                    'customer_id': customer_id,
-                    'error': str(e)
-                })
+                errors.append({"customer_id": customer_id, "error": str(e)})
 
         # Simulate 10 concurrent customers
         threads = [
@@ -126,14 +120,14 @@ class TestCheckoutFlow:
         assert len(errors) == 0, f"Unexpected errors: {errors}"
 
         # All payments should succeed
-        assert all(r['success'] for r in results)
+        assert all(r["success"] for r in results)
 
         # All should have unique transaction IDs
-        transaction_ids = [r['transaction_id'] for r in results]
+        transaction_ids = [r["transaction_id"] for r in results]
         assert len(set(transaction_ids)) == 10, "Duplicate transaction IDs detected!"
 
         # All should have unique payment IDs
-        payment_ids = [r['payment_id'] for r in results]
+        payment_ids = [r["payment_id"] for r in results]
         assert len(set(payment_ids)) == 10
 
         # Gateway should be called exactly 10 times (once per customer)

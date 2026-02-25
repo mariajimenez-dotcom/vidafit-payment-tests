@@ -1,4 +1,5 @@
 """Configurable mock payment gateway for testing."""
+
 import uuid
 import time
 from typing import Optional, List, Dict, Any
@@ -10,6 +11,7 @@ from src.retry_handler import NetworkTimeoutError, RateLimitError
 
 class GatewayScenario:
     """Predefined gateway behavior scenarios."""
+
     ALWAYS_SUCCESS = "ALWAYS_SUCCESS"
     NETWORK_TIMEOUT = "NETWORK_TIMEOUT"
     SOFT_DECLINE = "SOFT_DECLINE"
@@ -36,7 +38,7 @@ class FakeGateway:
         amount: Decimal,
         currency: str,
         card: Optional[Card] = None,
-        idempotency_key: Optional[str] = None
+        idempotency_key: Optional[str] = None,
     ) -> GatewayResponse:
         """
         Authorize a payment.
@@ -53,13 +55,15 @@ class FakeGateway:
         self.call_count += 1
 
         # Log the call
-        self.call_log.append({
-            'operation': 'authorize',
-            'amount': amount,
-            'currency': currency,
-            'idempotency_key': idempotency_key,
-            'timestamp': time.time()
-        })
+        self.call_log.append(
+            {
+                "operation": "authorize",
+                "amount": amount,
+                "currency": currency,
+                "idempotency_key": idempotency_key,
+                "timestamp": time.time(),
+            }
+        )
 
         # Check idempotency cache
         if idempotency_key and idempotency_key in self.idempotency_cache:
@@ -78,14 +82,18 @@ class FakeGateway:
 
         return response
 
-    def capture(self, transaction_id: str, amount: Optional[Decimal] = None) -> GatewayResponse:
+    def capture(
+        self, transaction_id: str, amount: Optional[Decimal] = None
+    ) -> GatewayResponse:
         """Capture a previously authorized transaction."""
-        self.call_log.append({
-            'operation': 'capture',
-            'transaction_id': transaction_id,
-            'amount': amount,
-            'timestamp': time.time()
-        })
+        self.call_log.append(
+            {
+                "operation": "capture",
+                "transaction_id": transaction_id,
+                "amount": amount,
+                "timestamp": time.time(),
+            }
+        )
 
         # Check if this scenario should fail capture
         if self.scenario == GatewayScenario.AUTH_SUCCESS_CAPTURE_FAIL:
@@ -93,31 +101,30 @@ class FakeGateway:
                 success=False,
                 error_code="capture_failed",
                 error_message="Capture failed",
-                is_retriable=False
+                is_retriable=False,
             )
 
         # Normal capture success
         if transaction_id in self.authorized_transactions:
-            return GatewayResponse(
-                success=True,
-                transaction_id=transaction_id
-            )
+            return GatewayResponse(success=True, transaction_id=transaction_id)
 
         return GatewayResponse(
             success=False,
             error_code="transaction_not_found",
             error_message="Transaction not found",
-            is_retriable=False
+            is_retriable=False,
         )
 
     def void(self, transaction_id: str) -> GatewayResponse:
         """Void a previously authorized transaction."""
         self.void_called = True
-        self.call_log.append({
-            'operation': 'void',
-            'transaction_id': transaction_id,
-            'timestamp': time.time()
-        })
+        self.call_log.append(
+            {
+                "operation": "void",
+                "transaction_id": transaction_id,
+                "timestamp": time.time(),
+            }
+        )
 
         if transaction_id in self.authorized_transactions:
             del self.authorized_transactions[transaction_id]
@@ -126,16 +133,13 @@ class FakeGateway:
         return GatewayResponse(
             success=False,
             error_code="transaction_not_found",
-            error_message="Transaction not found"
+            error_message="Transaction not found",
         )
 
     def _execute_scenario(self) -> GatewayResponse:
         """Execute the configured scenario."""
         if self.scenario == GatewayScenario.ALWAYS_SUCCESS:
-            return GatewayResponse(
-                success=True,
-                transaction_id=str(uuid.uuid4())
-            )
+            return GatewayResponse(success=True, transaction_id=str(uuid.uuid4()))
 
         elif self.scenario == GatewayScenario.NETWORK_TIMEOUT:
             raise NetworkTimeoutError("Gateway connection timeout")
@@ -146,7 +150,7 @@ class FakeGateway:
                 error_code="insufficient_funds",
                 error_message="Insufficient funds",
                 is_retriable=True,
-                decline_reason=DeclineReason.INSUFFICIENT_FUNDS
+                decline_reason=DeclineReason.INSUFFICIENT_FUNDS,
             )
 
         elif self.scenario == GatewayScenario.HARD_DECLINE:
@@ -155,7 +159,7 @@ class FakeGateway:
                 error_code="invalid_card",
                 error_message="Invalid card number",
                 is_retriable=False,
-                decline_reason=DeclineReason.INVALID_CARD
+                decline_reason=DeclineReason.INVALID_CARD,
             )
 
         elif self.scenario == GatewayScenario.RATE_LIMITED:
@@ -165,24 +169,15 @@ class FakeGateway:
             # Alternate between success and failure
             self.intermittent_counter += 1
             if self.intermittent_counter % 2 == 0:
-                return GatewayResponse(
-                    success=True,
-                    transaction_id=str(uuid.uuid4())
-                )
+                return GatewayResponse(success=True, transaction_id=str(uuid.uuid4()))
             else:
                 raise NetworkTimeoutError("Intermittent failure")
 
         elif self.scenario == GatewayScenario.AUTH_SUCCESS_CAPTURE_FAIL:
-            return GatewayResponse(
-                success=True,
-                transaction_id=str(uuid.uuid4())
-            )
+            return GatewayResponse(success=True, transaction_id=str(uuid.uuid4()))
 
         # Default success
-        return GatewayResponse(
-            success=True,
-            transaction_id=str(uuid.uuid4())
-        )
+        return GatewayResponse(success=True, transaction_id=str(uuid.uuid4()))
 
     def reset(self):
         """Reset gateway state for new test."""

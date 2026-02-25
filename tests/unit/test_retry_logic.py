@@ -3,6 +3,7 @@ Unit tests for retry logic with exponential backoff.
 
 These tests ensure retries work correctly and prevent duplicate charges.
 """
+
 import pytest
 import time
 from unittest.mock import Mock, patch
@@ -30,7 +31,7 @@ class TestRetryLogic:
         processor = PaymentProcessor(
             gateway=gateway,
             database=db,
-            retry_handler=RetryHandler(max_attempts=5, base_delay=0.1)
+            retry_handler=RetryHandler(max_attempts=5, base_delay=0.1),
         )
 
         payment = PaymentFactory.create()
@@ -69,7 +70,7 @@ class TestRetryLogic:
         processor = PaymentProcessor(
             gateway=gateway,
             database=db,
-            retry_handler=RetryHandler(max_attempts=max_attempts, base_delay=0.1)
+            retry_handler=RetryHandler(max_attempts=max_attempts, base_delay=0.1),
         )
 
         payment = PaymentFactory.create()
@@ -92,7 +93,7 @@ class TestRetryLogic:
         processor = PaymentProcessor(
             gateway=gateway,
             database=db,
-            retry_handler=RetryHandler(max_attempts=5, base_delay=0.1)
+            retry_handler=RetryHandler(max_attempts=5, base_delay=0.1),
         )
 
         payment = PaymentFactory.create()
@@ -120,7 +121,7 @@ class TestRetryLogic:
         processor = PaymentProcessor(
             gateway=gateway,
             database=db,
-            retry_handler=RetryHandler(max_attempts=5, base_delay=0.1)
+            retry_handler=RetryHandler(max_attempts=5, base_delay=0.1),
         )
 
         idempotency_key = "test-retry-key-123"
@@ -134,8 +135,8 @@ class TestRetryLogic:
 
         # Check all gateway calls used the same idempotency key
         for call in gateway.call_log:
-            if 'idempotency_key' in call:
-                assert call['idempotency_key'] == idempotency_key
+            if "idempotency_key" in call:
+                assert call["idempotency_key"] == idempotency_key
 
     def test_should_retry_logic(self):
         """Test the should_retry decision logic."""

@@ -3,6 +3,7 @@ Unit tests for idempotency validation.
 
 These tests prevent Bug #1: Race condition in retry mechanism that caused duplicate charges.
 """
+
 import pytest
 import time
 import threading
@@ -19,7 +20,9 @@ from mocks.fake_gateway import FakeGateway, GatewayScenario
 class TestIdempotency:
     """Test suite for idempotency validation."""
 
-    def test_duplicate_request_returns_cached_response(self, payment_processor, sample_payment):
+    def test_duplicate_request_returns_cached_response(
+        self, payment_processor, sample_payment
+    ):
         """
         Test that duplicate requests with same idempotency key return cached response
         without creating duplicate charges.
@@ -49,7 +52,7 @@ class TestIdempotency:
         validator = IdempotencyValidator(cache_ttl_seconds=1)
 
         key = "test-key-123"
-        payload = {'amount': '100.00', 'currency': 'USD'}
+        payload = {"amount": "100.00", "currency": "USD"}
         response = GatewayResponse(success=True, transaction_id="txn-123")
 
         # Store response
@@ -73,12 +76,10 @@ class TestIdempotency:
         """
         # Create two payments with different idempotency keys
         payment1 = PaymentFactory.create(
-            amount=Decimal("100.00"),
-            idempotency_key="key-1"
+            amount=Decimal("100.00"), idempotency_key="key-1"
         )
         payment2 = PaymentFactory.create(
-            amount=Decimal("200.00"),
-            idempotency_key="key-2"
+            amount=Decimal("200.00"), idempotency_key="key-2"
         )
 
         # Process both
@@ -93,7 +94,9 @@ class TestIdempotency:
         # Gateway should be called twice
         assert payment_processor.gateway.call_count == 2
 
-    def test_retry_with_same_key_after_failure(self, fake_gateway, idempotency_validator, fake_db):
+    def test_retry_with_same_key_after_failure(
+        self, fake_gateway, idempotency_validator, fake_db
+    ):
         """
         Test that retries after failure use the same idempotency key.
         """
@@ -104,7 +107,7 @@ class TestIdempotency:
             gateway=fake_gateway,
             database=fake_db,
             idempotency_validator=idempotency_validator,
-            retry_handler=RetryHandler(max_attempts=3, base_delay=0.1)
+            retry_handler=RetryHandler(max_attempts=3, base_delay=0.1),
         )
 
         payment = PaymentFactory.create(idempotency_key="retry-key")
@@ -127,9 +130,7 @@ class TestIdempotency:
         """
         validator = IdempotencyValidator()
         processor = PaymentProcessor(
-            gateway=fake_gateway,
-            database=fake_db,
-            idempotency_validator=validator
+            gateway=fake_gateway, database=fake_db, idempotency_validator=validator
         )
 
         idempotency_key = "concurrent-key"

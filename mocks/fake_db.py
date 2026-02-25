@@ -1,4 +1,5 @@
 """In-memory database mock for testing."""
+
 import threading
 from typing import Dict, Optional, List
 from src.models import Payment, Transaction
@@ -52,8 +53,7 @@ class FakeDatabase:
     def get_transactions_by_payment(self, payment_id: str) -> List[Transaction]:
         """Get all transactions for a payment."""
         return [
-            txn for txn in self.transactions.values()
-            if txn.payment_id == payment_id
+            txn for txn in self.transactions.values() if txn.payment_id == payment_id
         ]
 
     def begin_transaction(self):

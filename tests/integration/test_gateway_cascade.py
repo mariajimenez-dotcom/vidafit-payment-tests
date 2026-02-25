@@ -3,6 +3,7 @@ Integration tests for payment method cascade/fallback logic.
 
 These tests prevent Bug #3: Payment method fallback bug causing double charges.
 """
+
 import pytest
 from decimal import Decimal
 
@@ -99,8 +100,7 @@ class TestGatewayCascade:
 
         # Process with cascade
         response = processor.process_with_cascade(
-            payment,
-            [primary, secondary, tertiary]
+            payment, [primary, secondary, tertiary]
         )
 
         # Should fail

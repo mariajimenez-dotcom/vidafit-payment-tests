@@ -1,4 +1,5 @@
 """Data models for payment processing."""
+
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
@@ -9,6 +10,7 @@ import uuid
 
 class PaymentStatus(str, Enum):
     """Payment status states."""
+
     PENDING = "PENDING"
     PROCESSING = "PROCESSING"
     SUCCESS = "SUCCESS"
@@ -19,6 +21,7 @@ class PaymentStatus(str, Enum):
 
 class DeclineReason(str, Enum):
     """Reason codes for declined payments."""
+
     INSUFFICIENT_FUNDS = "insufficient_funds"
     INVALID_CARD = "invalid_card"
     EXPIRED_CARD = "expired_card"
@@ -30,6 +33,7 @@ class DeclineReason(str, Enum):
 @dataclass
 class Card:
     """Payment card information."""
+
     number: str
     exp_month: int
     exp_year: int
@@ -40,6 +44,7 @@ class Card:
 @dataclass
 class Payment:
     """Payment entity."""
+
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     amount: Decimal = field(default_factory=lambda: Decimal("0"))
     currency: str = "USD"
@@ -61,6 +66,7 @@ class Payment:
 @dataclass
 class Transaction:
     """Transaction record for audit trail."""
+
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     payment_id: str = ""
     amount: Decimal = field(default_factory=lambda: Decimal("0"))
@@ -76,6 +82,7 @@ class Transaction:
 @dataclass
 class GatewayResponse:
     """Response from payment gateway."""
+
     success: bool
     transaction_id: Optional[str] = None
     error_code: Optional[str] = None
@@ -87,6 +94,7 @@ class GatewayResponse:
 @dataclass
 class IdempotencyCacheEntry:
     """Cached response for idempotency."""
+
     key: str
     response: GatewayResponse
     timestamp: float

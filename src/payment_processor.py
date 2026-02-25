@@ -1,4 +1,5 @@
 """Core payment processing logic."""
+
 import hashlib
 import time
 from typing import Optional, Dict, Any
@@ -9,7 +10,7 @@ from src.models import (
     PaymentStatus,
     GatewayResponse,
     DeclineReason,
-    Transaction
+    Transaction,
 )
 from src.state_machine import validate_transition, is_retriable_state
 from src.retry_handler import RetryHandler, NetworkTimeoutError
@@ -37,25 +38,25 @@ class IdempotencyValidator:
             cached = self.cache[key]
 
             # Check if expired
-            if cached['timestamp'] + self.ttl < time.time():
+            if cached["timestamp"] + self.ttl < time.time():
                 del self.cache[key]
                 return None
 
             # Verify payload matches (prevent key reuse with different data)
             payload_hash = self._hash_payload(payload)
-            if cached['payload_hash'] != payload_hash:
+            if cached["payload_hash"] != payload_hash:
                 raise ValueError("Idempotency key reused with different payload")
 
-            return cached['response']
+            return cached["response"]
 
         return None
 
     def store(self, key: str, response: GatewayResponse, payload: Dict[str, Any]):
         """Store response in cache."""
         self.cache[key] = {
-            'response': response,
-            'timestamp': time.time(),
-            'payload_hash': self._hash_payload(payload)
+            "response": response,
+            "timestamp": time.time(),
+            "payload_hash": self._hash_payload(payload),
         }
 
     def _hash_payload(self, payload: Dict[str, Any]) -> str:
@@ -72,7 +73,7 @@ class PaymentProcessor:
         gateway,
         database=None,
         idempotency_validator: Optional[IdempotencyValidator] = None,
-        retry_handler: Optional[RetryHandler] = None
+        retry_handler: Optional[RetryHandler] = None,
     ):
         self.gateway = gateway
         self.database = database
@@ -93,8 +94,7 @@ class PaymentProcessor:
         if payment.idempotency_key:
             payload = self._payment_to_payload(payment)
             cached_response = self.idempotency_validator.check(
-                payment.idempotency_key,
-                payload
+                payment.idempotency_key, payload
             )
             if cached_response:
                 return cached_response
@@ -105,8 +105,7 @@ class PaymentProcessor:
         try:
             # Execute with retry
             response = self.retry_handler.execute_with_retry(
-                self._authorize_payment,
-                payment
+                self._authorize_payment, payment
             )
 
             # Update status based on response
@@ -123,9 +122,7 @@ class PaymentProcessor:
             # Cache response if idempotent
             if payment.idempotency_key:
                 self.idempotency_validator.store(
-                    payment.idempotency_key,
-                    response,
-                    self._payment_to_payload(payment)
+                    payment.idempotency_key, response, self._payment_to_payload(payment)
                 )
 
             # Persist to database
@@ -146,7 +143,7 @@ class PaymentProcessor:
             amount=payment.amount,
             currency=payment.currency,
             card=payment.card,
-            idempotency_key=payment.idempotency_key
+            idempotency_key=payment.idempotency_key,
         )
 
     def _update_payment_status(self, payment: Payment, new_status: PaymentStatus):
@@ -157,16 +154,12 @@ class PaymentProcessor:
     def _payment_to_payload(self, payment: Payment) -> Dict[str, Any]:
         """Convert payment to payload dict for hashing."""
         return {
-            'amount': str(payment.amount),
-            'currency': payment.currency,
-            'card_last4': payment.card.number[-4:] if payment.card else None
+            "amount": str(payment.amount),
+            "currency": payment.currency,
+            "card_last4": payment.card.number[-4:] if payment.card else None,
         }
 
-    def process_with_cascade(
-        self,
-        payment: Payment,
-        gateways: list
-    ) -> GatewayResponse:
+    def process_with_cascade(self, payment: Payment, gateways: list) -> GatewayResponse:
         """
         Process payment with gateway cascade/fallback.
 
@@ -226,9 +219,7 @@ class PaymentProcessor:
                         pass  # Log but continue
 
                 last_response = GatewayResponse(
-                    success=False,
-                    error_message=str(e),
-                    is_retriable=False
+                    success=False, error_message=str(e), is_retriable=False
                 )
 
         # All gateways failed
@@ -237,7 +228,5 @@ class PaymentProcessor:
             self.database.save_payment(payment)
 
         return last_response or GatewayResponse(
-            success=False,
-            error_message="All gateways failed",
-            is_retriable=False
+            success=False, error_message="All gateways failed", is_retriable=False
         )

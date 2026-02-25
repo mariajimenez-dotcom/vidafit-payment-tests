@@ -1,4 +1,5 @@
 """Global pytest fixtures."""
+
 import pytest
 from decimal import Decimal
 
@@ -44,17 +45,14 @@ def payment_processor(fake_gateway, fake_db, idempotency_validator, retry_handle
         gateway=fake_gateway,
         database=fake_db,
         idempotency_validator=idempotency_validator,
-        retry_handler=retry_handler
+        retry_handler=retry_handler,
     )
 
 
 @pytest.fixture
 def sample_payment():
     """Provide a sample payment."""
-    return PaymentFactory.create(
-        amount=Decimal("100.00"),
-        currency="USD"
-    )
+    return PaymentFactory.create(amount=Decimal("100.00"), currency="USD")
 
 
 @pytest.fixture

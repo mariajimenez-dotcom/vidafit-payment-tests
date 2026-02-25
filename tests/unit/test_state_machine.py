@@ -3,6 +3,7 @@ Unit tests for payment state machine.
 
 These tests prevent Bug #2: Incorrect state transitions on soft declines.
 """
+
 import pytest
 
 from src.state_machine import (
@@ -10,7 +11,7 @@ from src.state_machine import (
     InvalidStateTransitionError,
     is_terminal_state,
     is_retriable_state,
-    get_valid_next_states
+    get_valid_next_states,
 )
 from src.models import PaymentStatus
 from fixtures.factories import PaymentFactory
@@ -74,10 +75,12 @@ class TestStateMachine:
         assert is_retriable_state(PaymentStatus.DECLINED_RETRIABLE) is True
 
         # Should be able to retry (go back to PROCESSING)
-        assert validate_transition(
-            PaymentStatus.DECLINED_RETRIABLE,
-            PaymentStatus.PROCESSING
-        ) is True
+        assert (
+            validate_transition(
+                PaymentStatus.DECLINED_RETRIABLE, PaymentStatus.PROCESSING
+            )
+            is True
+        )
 
     def test_hard_decline_maps_to_terminal_failed_state(self):
         """
@@ -86,10 +89,9 @@ class TestStateMachine:
         Hard declines should NOT be retried.
         """
         # Should be able to transition to FAILED
-        assert validate_transition(
-            PaymentStatus.PROCESSING,
-            PaymentStatus.FAILED
-        ) is True
+        assert (
+            validate_transition(PaymentStatus.PROCESSING, PaymentStatus.FAILED) is True
+        )
 
         # FAILED should be terminal (no further transitions)
         assert is_terminal_state(PaymentStatus.FAILED) is True

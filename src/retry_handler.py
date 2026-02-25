@@ -1,21 +1,24 @@
 """Retry logic with exponential backoff and idempotency."""
+
 import time
 from typing import Optional, Callable, Any
 from tenacity import (
     retry,
     stop_after_attempt,
     wait_exponential,
-    retry_if_exception_type
+    retry_if_exception_type,
 )
 
 
 class NetworkTimeoutError(Exception):
     """Raised when network timeout occurs."""
+
     pass
 
 
 class RateLimitError(Exception):
     """Raised when rate limit is exceeded."""
+
     pass
 
 
@@ -27,11 +30,7 @@ class RetryHandler:
         self.base_delay = base_delay
 
     def execute_with_retry(
-        self,
-        func: Callable,
-        *args,
-        idempotency_key: Optional[str] = None,
-        **kwargs
+        self, func: Callable, *args, idempotency_key: Optional[str] = None, **kwargs
     ) -> Any:
         """
         Execute function with retry logic.
@@ -46,17 +45,15 @@ class RetryHandler:
         """
         # Add idempotency key to kwargs if provided
         if idempotency_key:
-            kwargs['idempotency_key'] = idempotency_key
+            kwargs["idempotency_key"] = idempotency_key
 
         # Create retry decorator
         retry_decorator = retry(
             stop=stop_after_attempt(self.max_attempts),
             wait=wait_exponential(
-                multiplier=self.base_delay,
-                min=self.base_delay,
-                max=10
+                multiplier=self.base_delay, min=self.base_delay, max=10
             ),
-            retry=retry_if_exception_type((NetworkTimeoutError, RateLimitError))
+            retry=retry_if_exception_type((NetworkTimeoutError, RateLimitError)),
         )
 
         # Apply retry decorator and execute
@@ -70,4 +67,4 @@ class RetryHandler:
 
     def calculate_backoff_delay(self, attempt: int) -> float:
         """Calculate exponential backoff delay for given attempt number."""
-        return min(self.base_delay * (2 ** attempt), 10)
+        return min(self.base_delay * (2**attempt), 10)
