@@ -5,8 +5,13 @@ import time
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
-from src.models import (DeclineReason, GatewayResponse, Payment, PaymentStatus,
-                        Transaction)
+from src.models import (
+    DeclineReason,
+    GatewayResponse,
+    Payment,
+    PaymentStatus,
+    Transaction,
+)
 from src.retry_handler import NetworkTimeoutError, RetryHandler
 from src.state_machine import is_retriable_state, validate_transition
 

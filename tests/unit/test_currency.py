@@ -8,9 +8,12 @@ from decimal import Decimal
 
 import pytest
 
-from src.currency_converter import (CurrencyConversionError, convert_currency,
-                                    get_conversion_variance,
-                                    roundtrip_conversion)
+from src.currency_converter import (
+    CurrencyConversionError,
+    convert_currency,
+    get_conversion_variance,
+    roundtrip_conversion,
+)
 
 
 @pytest.mark.unit

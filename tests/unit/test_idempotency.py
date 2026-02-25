@@ -123,6 +123,7 @@ class TestIdempotency:
             # The important part is the key was preserved
             assert payment.idempotency_key == "retry-key"
 
+    @pytest.mark.serial
     def test_concurrent_requests_same_key_single_charge(self, fake_gateway, fake_db):
         """
         Test that concurrent requests with same idempotency key result in single charge.
