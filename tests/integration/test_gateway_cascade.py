@@ -4,14 +4,15 @@ Integration tests for payment method cascade/fallback logic.
 These tests prevent Bug #3: Payment method fallback bug causing double charges.
 """
 
-import pytest
 from decimal import Decimal
 
-from src.payment_processor import PaymentProcessor
-from src.models import PaymentStatus
-from mocks.fake_gateway import FakeGateway, GatewayScenario
-from mocks.fake_db import FakeDatabase
+import pytest
+
 from fixtures.factories import PaymentFactory
+from mocks.fake_db import FakeDatabase
+from mocks.fake_gateway import FakeGateway, GatewayScenario
+from src.models import PaymentStatus
+from src.payment_processor import PaymentProcessor
 
 
 @pytest.mark.integration

@@ -4,15 +4,16 @@ Integration tests for database persistence and state consistency.
 These tests ensure payment states are correctly persisted and race conditions are prevented.
 """
 
-import pytest
 import threading
 from decimal import Decimal
 
-from src.payment_processor import PaymentProcessor
-from src.models import PaymentStatus
-from mocks.fake_gateway import FakeGateway, GatewayScenario
-from mocks.fake_db import FakeDatabase
+import pytest
+
 from fixtures.factories import PaymentFactory
+from mocks.fake_db import FakeDatabase
+from mocks.fake_gateway import FakeGateway, GatewayScenario
+from src.models import PaymentStatus
+from src.payment_processor import PaymentProcessor
 
 
 @pytest.mark.integration

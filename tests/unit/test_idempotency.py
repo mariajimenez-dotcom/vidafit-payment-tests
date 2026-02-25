@@ -4,16 +4,17 @@ Unit tests for idempotency validation.
 These tests prevent Bug #1: Race condition in retry mechanism that caused duplicate charges.
 """
 
-import pytest
-import time
 import threading
+import time
 from decimal import Decimal
 
-from src.payment_processor import IdempotencyValidator, PaymentProcessor
-from src.models import GatewayResponse, PaymentStatus
-from src.retry_handler import RetryHandler
+import pytest
+
 from fixtures.factories import PaymentFactory
 from mocks.fake_gateway import FakeGateway, GatewayScenario
+from src.models import GatewayResponse, PaymentStatus
+from src.payment_processor import IdempotencyValidator, PaymentProcessor
+from src.retry_handler import RetryHandler
 
 
 @pytest.mark.unit

@@ -1,10 +1,11 @@
 """Test data factories using Faker."""
 
-from decimal import Decimal
-from faker import Faker
 import uuid
+from decimal import Decimal
 
-from src.models import Payment, Card, PaymentStatus, Transaction
+from faker import Faker
+
+from src.models import Card, Payment, PaymentStatus, Transaction
 
 fake = Faker()
 

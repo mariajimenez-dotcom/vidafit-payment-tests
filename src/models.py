@@ -1,11 +1,11 @@
 """Data models for payment processing."""
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Optional
-import uuid
 
 
 class PaymentStatus(str, Enum):

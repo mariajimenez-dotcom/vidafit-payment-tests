@@ -4,16 +4,17 @@ Unit tests for retry logic with exponential backoff.
 These tests ensure retries work correctly and prevent duplicate charges.
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
 from decimal import Decimal
+from unittest.mock import Mock, patch
 
-from src.retry_handler import RetryHandler, NetworkTimeoutError, RateLimitError
-from src.payment_processor import PaymentProcessor
-from mocks.fake_gateway import FakeGateway, GatewayScenario
-from mocks.fake_db import FakeDatabase
+import pytest
+
 from fixtures.factories import PaymentFactory
+from mocks.fake_db import FakeDatabase
+from mocks.fake_gateway import FakeGateway, GatewayScenario
+from src.payment_processor import PaymentProcessor
+from src.retry_handler import NetworkTimeoutError, RateLimitError, RetryHandler
 
 
 @pytest.mark.unit

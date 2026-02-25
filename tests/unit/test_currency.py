@@ -4,15 +4,13 @@ Unit tests for currency conversion with proper decimal handling.
 These tests prevent Bug #4: Currency conversion rounding errors (0.01 BRL discrepancies).
 """
 
-import pytest
 from decimal import Decimal
 
-from src.currency_converter import (
-    convert_currency,
-    roundtrip_conversion,
-    get_conversion_variance,
-    CurrencyConversionError,
-)
+import pytest
+
+from src.currency_converter import (CurrencyConversionError, convert_currency,
+                                    get_conversion_variance,
+                                    roundtrip_conversion)
 
 
 @pytest.mark.unit

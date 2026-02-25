@@ -2,18 +2,13 @@
 
 import hashlib
 import time
-from typing import Optional, Dict, Any
 from decimal import Decimal
+from typing import Any, Dict, Optional
 
-from src.models import (
-    Payment,
-    PaymentStatus,
-    GatewayResponse,
-    DeclineReason,
-    Transaction,
-)
-from src.state_machine import validate_transition, is_retriable_state
-from src.retry_handler import RetryHandler, NetworkTimeoutError
+from src.models import (DeclineReason, GatewayResponse, Payment, PaymentStatus,
+                        Transaction)
+from src.retry_handler import NetworkTimeoutError, RetryHandler
+from src.state_machine import is_retriable_state, validate_transition
 
 
 class IdempotencyValidator:

@@ -1,12 +1,13 @@
 """Global pytest fixtures."""
 
-import pytest
 from decimal import Decimal
 
-from mocks.fake_gateway import FakeGateway, GatewayScenario
+import pytest
+
+from fixtures.factories import CardFactory, PaymentFactory
 from mocks.fake_db import FakeDatabase
-from fixtures.factories import PaymentFactory, CardFactory
-from src.payment_processor import PaymentProcessor, IdempotencyValidator
+from mocks.fake_gateway import FakeGateway, GatewayScenario
+from src.payment_processor import IdempotencyValidator, PaymentProcessor
 from src.retry_handler import RetryHandler
 
 

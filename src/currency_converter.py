@@ -1,8 +1,7 @@
 """Currency conversion with proper decimal handling."""
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Dict, Optional
-
 
 # Sample exchange rates (in production, fetch from external API)
 EXCHANGE_RATES: Dict[tuple, Decimal] = {

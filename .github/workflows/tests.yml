@@ -42,7 +42,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          pytest tests/integration -v --cov=src --cov-append --cov-report=xml
+          pytest tests/integration -v --cov=src --cov-append --cov-report=xml --cov-report=term-missing
 
       - name: Check coverage threshold (>85%)
         run: |

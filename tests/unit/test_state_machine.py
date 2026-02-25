@@ -6,15 +6,11 @@ These tests prevent Bug #2: Incorrect state transitions on soft declines.
 
 import pytest
 
-from src.state_machine import (
-    validate_transition,
-    InvalidStateTransitionError,
-    is_terminal_state,
-    is_retriable_state,
-    get_valid_next_states,
-)
-from src.models import PaymentStatus
 from fixtures.factories import PaymentFactory
+from src.models import PaymentStatus
+from src.state_machine import (InvalidStateTransitionError,
+                               get_valid_next_states, is_retriable_state,
+                               is_terminal_state, validate_transition)
 
 
 @pytest.mark.unit

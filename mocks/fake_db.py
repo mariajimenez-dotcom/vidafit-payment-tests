@@ -1,7 +1,8 @@
 """In-memory database mock for testing."""
 
 import threading
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
+
 from src.models import Payment, Transaction
 
 
