@@ -1,6 +1,7 @@
 """Core payment processing logic."""
 
 import hashlib
+import threading
 import time
 from decimal import Decimal
 from typing import Any, Dict, Optional
@@ -22,42 +23,80 @@ class IdempotencyValidator:
     def __init__(self, cache_ttl_seconds: int = 604800):  # 7 days default
         self.cache: Dict[str, Dict[str, Any]] = {}
         self.ttl = cache_ttl_seconds
+        self._lock = threading.Lock()
+        self._processing_keys: Dict[str, threading.Event] = {}
 
     def check(self, key: str, payload: Dict[str, Any]) -> Optional[GatewayResponse]:
         """
         Check if request with this key has been processed before.
+        If not cached and not processing, reserves the key for processing.
 
         Args:
             key: Idempotency key
             payload: Request payload for hash verification
 
         Returns:
-            Cached response if found and valid, None otherwise
+            Cached response if found and valid, None if should process
         """
-        if key in self.cache:
-            cached = self.cache[key]
+        with self._lock:
+            # Check if already cached
+            if key in self.cache:
+                cached = self.cache[key]
 
-            # Check if expired
-            if cached["timestamp"] + self.ttl < time.time():
-                del self.cache[key]
+                # Check if expired
+                if cached["timestamp"] + self.ttl < time.time():
+                    del self.cache[key]
+                    # Mark as processing
+                    self._processing_keys[key] = threading.Event()
+                    return None
+
+                # Verify payload matches (prevent key reuse with different data)
+                payload_hash = self._hash_payload(payload)
+                if cached["payload_hash"] != payload_hash:
+                    raise ValueError("Idempotency key reused with different payload")
+
+                return cached["response"]
+
+            # Check if currently being processed by another thread
+            if key in self._processing_keys:
+                event = self._processing_keys[key]
+
+        # If another thread is processing, wait for it
+        if key in self._processing_keys:
+            event.wait(timeout=30)  # Wait up to 30 seconds
+            # After waiting, check cache again
+            with self._lock:
+                if key in self.cache:
+                    return self.cache[key]["response"]
+                # If still not cached, something went wrong, return None to retry
                 return None
 
-            # Verify payload matches (prevent key reuse with different data)
-            payload_hash = self._hash_payload(payload)
-            if cached["payload_hash"] != payload_hash:
-                raise ValueError("Idempotency key reused with different payload")
+        # Not cached and not processing - reserve it
+        with self._lock:
+            # Double-check it wasn't added while we waited
+            if key not in self.cache and key not in self._processing_keys:
+                self._processing_keys[key] = threading.Event()
+                return None
 
-            return cached["response"]
+            # Was added while we waited
+            if key in self.cache:
+                return self.cache[key]["response"]
 
         return None
 
     def store(self, key: str, response: GatewayResponse, payload: Dict[str, Any]):
-        """Store response in cache."""
-        self.cache[key] = {
-            "response": response,
-            "timestamp": time.time(),
-            "payload_hash": self._hash_payload(payload),
-        }
+        """Store response in cache and notify waiting threads."""
+        with self._lock:
+            self.cache[key] = {
+                "response": response,
+                "timestamp": time.time(),
+                "payload_hash": self._hash_payload(payload),
+            }
+
+            # Notify waiting threads
+            if key in self._processing_keys:
+                self._processing_keys[key].set()
+                del self._processing_keys[key]
 
     def _hash_payload(self, payload: Dict[str, Any]) -> str:
         """Create hash of payload for verification."""
